@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="stroke_small">4dp</dimen>
+    <dimen name="margin_xsmall">16dp</dimen>
+    <dimen name="round_button_small">32dp</dimen>
+    <dimen name="margin_small">32dp</dimen>
+    <dimen name="margin_xlarge">92dp</dimen>
+    <dimen name="round_button_medium">64dp</dimen>
+</resources>

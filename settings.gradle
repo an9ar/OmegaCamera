@@ -1,0 +1,2 @@
+rootProject.name='Omega Camera'
+include ':app'

@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Omega Camera</string>
+
+    <string name="camera_button_switch">Переключить камеру</string>
+    <string name="camera_button_photo">Сделать фото</string>
+    <string name="camera_button_gallery">Галерея</string>
+
+    <string name="gallery_button_back">Назад</string>
+    <string name="gallery_button_share">Поделиться</string>
+    <string name="gallery_button_delete">Удалить</string>
+    <string name="share_hint">Поделиться с помощью</string>
+
+    <string name="delete_dialog_button_alt">Delete</string>
+    <string name="delete_dialog_question">Delete current photo?</string>
+    <string name="delete_dialog_title">Confirm</string>
+</resources>
