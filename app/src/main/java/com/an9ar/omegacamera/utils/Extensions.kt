@@ -1,9 +1,10 @@
-package com.an9ar.omegacamera.extensions
+package com.an9ar.omegacamera.utils
 
 import android.os.Build
 import android.util.Log
 import android.view.DisplayCutout
 import android.view.View
+import android.view.ViewTreeObserver
 import android.view.WindowManager
 import android.widget.ImageButton
 import androidx.annotation.RequiresApi
@@ -51,13 +52,27 @@ fun View.padWithDisplayCutout() {
 }
 
 fun AlertDialog.showImmersive() {
-    window?.setFlags(
-        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
-
+    window?.setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
     window?.decorView?.systemUiVisibility = FLAGS_FULLSCREEN
-
     show()
-
     window?.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+}
+
+fun View.gone() {
+    this.visibility = View.GONE
+}
+
+fun View.visible() {
+    this.visibility = View.VISIBLE
+}
+
+inline fun View.afterMeasured(crossinline block: () -> Unit) {
+    viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+        override fun onGlobalLayout() {
+            if (measuredWidth > 0 && measuredHeight > 0) {
+                viewTreeObserver.removeOnGlobalLayoutListener(this)
+                block()
+            }
+        }
+    })
 }

@@ -7,7 +7,7 @@ import android.os.Bundle
 import android.view.KeyEvent
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.an9ar.omegacamera.R
-import com.an9ar.omegacamera.extensions.FLAGS_FULLSCREEN
+import com.an9ar.omegacamera.utils.FLAGS_FULLSCREEN
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 
@@ -21,7 +21,8 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         fragmentContainer.postDelayed({
-            fragmentContainer.systemUiVisibility = FLAGS_FULLSCREEN
+            fragmentContainer.systemUiVisibility =
+                FLAGS_FULLSCREEN
         }, IMMERSIVE_FLAG_TIMEOUT)
     }
 

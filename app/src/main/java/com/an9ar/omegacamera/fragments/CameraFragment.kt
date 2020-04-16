@@ -13,13 +13,12 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.view.KeyEvent
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.util.Log
+import android.view.*
 import android.webkit.MimeTypeMap
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.TextureViewMeteringPointFactory
 import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
 import androidx.core.view.setPadding
@@ -31,17 +30,15 @@ import com.an9ar.omegacamera.R
 import com.an9ar.omegacamera.activities.MainActivity
 import com.an9ar.omegacamera.activities.MainActivity.Companion.KEY_EVENT_ACTION
 import com.an9ar.omegacamera.activities.MainActivity.Companion.KEY_EVENT_EXTRA
-import com.an9ar.omegacamera.extensions.ANIMATION_FAST_MILLIS
-import com.an9ar.omegacamera.extensions.ANIMATION_SLOW_MILLIS
-import com.an9ar.omegacamera.extensions.log
-import com.an9ar.omegacamera.extensions.simulateClick
-import com.an9ar.omegacamera.utils.LuminosityAnalyzer
+import com.an9ar.omegacamera.utils.*
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.camera_ui.*
 import kotlinx.android.synthetic.main.camera_ui.view.*
 import kotlinx.android.synthetic.main.fragment_camera.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
@@ -49,13 +46,15 @@ import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.math.abs
+import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.min
 
-class CameraFragment : Fragment() {
+class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
 
     private lateinit var outputDirectory: File
     private lateinit var broadcastManager: LocalBroadcastManager
+    private lateinit var scaleDetector: ScaleGestureDetector
 
     private var displayId: Int = -1
     private var lensFacing: Int = CameraSelector.LENS_FACING_BACK
@@ -63,6 +62,7 @@ class CameraFragment : Fragment() {
     private var imageCapture: ImageCapture? = null
     private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
+    private var lastScaleFactor = 0f
 
     private val displayManager by lazy {
         requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
@@ -101,19 +101,60 @@ class CameraFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         cameraExecutor = Executors.newSingleThreadExecutor()
-
         broadcastManager = LocalBroadcastManager.getInstance(view.context)
+        scaleDetector = ScaleGestureDetector(activity, this)
         val filter = IntentFilter().apply { addAction(KEY_EVENT_ACTION) }
         broadcastManager.registerReceiver(volumeDownReceiver, filter)
-
         displayManager.registerDisplayListener(displayListener, null)
-
         outputDirectory = MainActivity.getOutputDirectory(requireContext())
-
         previewView.post {
             displayId = previewView.display.displayId
             updateCameraUi()
             bindCameraUseCases()
+        }
+        setUpScreenControls()
+    }
+
+    private fun setUpScreenControls() {
+        previewView.afterMeasured {
+            previewView.setOnTouchListener { _, event ->
+                return@setOnTouchListener when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        cameraFocus.x = event.x - 64
+                        cameraFocus.y = event.y - 64
+                        true
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
+                            previewView.width.toFloat(), previewView.height.toFloat()
+                        )
+                        val autoFocusPoint = factory.createPoint(event.x, event.y)
+                        CoroutineScope(Dispatchers.Main).launch{
+                            cameraFocus.visible()
+                            delay(200)
+                            cameraFocus.gone()
+                        }
+                        try {
+                            camera?.cameraControl?.startFocusAndMetering(
+                                FocusMeteringAction.Builder(
+                                    autoFocusPoint,
+                                    FocusMeteringAction.FLAG_AF
+                                ).apply {
+                                    //focus only when the user tap the preview
+                                    disableAutoCancel()
+                                }.build()
+                            )
+                        } catch (e: CameraInfoUnavailableException) {
+                            log( "cannot access camera - $e")
+                        }
+                        true
+                    }
+                    else -> {
+                        scaleDetector.onTouchEvent(event)
+                        true
+                    }
+                }
+            }
         }
     }
 
@@ -164,7 +205,7 @@ class CameraFragment : Fragment() {
                 .build()
                 .also {
                     it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luminosity ->
-                        log("Average luminosity: $luminosity")
+                        //todo log("Average luminosity: $luminosity")
                     })
                 }
 
@@ -224,12 +265,12 @@ class CameraFragment : Fragment() {
                 imageCapture.takePicture(
                     outputOptions, cameraExecutor, object : ImageCapture.OnImageSavedCallback {
                         override fun onError(exc: ImageCaptureException) {
-                            log( "Photo capture failed: ${exc.message}")
+                            log("Photo capture failed: ${exc.message}")
                         }
 
                         override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                             val savedUri = output.savedUri ?: Uri.fromFile(photoFile)
-                            log( "Photo capture succeeded: $savedUri")
+                            log("Photo capture succeeded: $savedUri")
 
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                 setGalleryThumbnail(savedUri)
@@ -258,7 +299,9 @@ class CameraFragment : Fragment() {
                     cameraContainer.postDelayed({
                         cameraContainer.foreground = ColorDrawable(Color.BLACK)
                         cameraContainer.postDelayed(
-                            { cameraContainer.foreground = null }, ANIMATION_FAST_MILLIS)
+                            { cameraContainer.foreground = null },
+                            ANIMATION_FAST_MILLIS
+                        )
                     }, ANIMATION_SLOW_MILLIS)
                 }
             }
@@ -286,6 +329,28 @@ class CameraFragment : Fragment() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         updateCameraUi()
+    }
+
+    override fun onScaleBegin(detector: ScaleGestureDetector?): Boolean {
+        return true
+    }
+
+    override fun onScaleEnd(detector: ScaleGestureDetector?) {
+
+    }
+
+    override fun onScale(detector: ScaleGestureDetector?): Boolean {
+        val zoomRatio: Float? = camera?.cameraInfo?.zoomState?.value?.zoomRatio
+        val minZoomRatio: Float? = camera?.cameraInfo?.zoomState?.value?.minZoomRatio
+        val maxZoomRatio: Float? = camera?.cameraInfo?.zoomState?.value?.maxZoomRatio
+        val scaleFactor = scaleDetector.scaleFactor
+        if (lastScaleFactor == 0f || (Math.signum(scaleFactor) == Math.signum(lastScaleFactor))) {
+            camera?.cameraControl?.setZoomRatio(Math.max(minZoomRatio!!, Math.min(zoomRatio!! * scaleFactor, maxZoomRatio!!)))
+            lastScaleFactor = scaleFactor
+        } else {
+            lastScaleFactor = 0f
+        }
+        return true
     }
 
     companion object {

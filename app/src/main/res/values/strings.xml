@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">Omega Camera</string>
 
+    <string name="permissions_error_title">Разрешение не получено</string>
+    <string name="permissions_error_value">Пожалуйста, предоставьте приложению доступ к камере в настройках.</string>
+    <string name="permissions_error_screen_text">Отсутствует разрешение на камеру</string>
+
     <string name="camera_button_switch">Переключить камеру</string>
     <string name="camera_button_photo">Сделать фото</string>
     <string name="camera_button_gallery">Галерея</string>

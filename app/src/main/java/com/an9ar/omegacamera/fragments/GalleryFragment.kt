@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.MimeTypeMap
-import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
@@ -18,8 +17,8 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import com.an9ar.omegacamera.BuildConfig
 import com.an9ar.omegacamera.R
-import com.an9ar.omegacamera.extensions.padWithDisplayCutout
-import com.an9ar.omegacamera.extensions.showImmersive
+import com.an9ar.omegacamera.utils.padWithDisplayCutout
+import com.an9ar.omegacamera.utils.showImmersive
 import kotlinx.android.synthetic.main.fragment_gallery.*
 import java.io.File
 import java.util.*

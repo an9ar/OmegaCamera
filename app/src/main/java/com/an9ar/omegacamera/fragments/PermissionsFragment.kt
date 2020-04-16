@@ -2,13 +2,22 @@ package com.an9ar.omegacamera.fragments
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
-import android.widget.Toast
+import android.provider.Settings
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import com.an9ar.omegacamera.R
+import com.an9ar.omegacamera.utils.gone
+import com.an9ar.omegacamera.utils.visible
+import com.tapadoo.alerter.Alerter
+import kotlinx.android.synthetic.main.fragmet_permissions.*
 
 class PermissionsFragment : Fragment() {
 
@@ -21,6 +30,12 @@ class PermissionsFragment : Fragment() {
         }
     }
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? = inflater.inflate(R.layout.fragmet_permissions, container, false)
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -29,10 +44,22 @@ class PermissionsFragment : Fragment() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSIONS_REQUEST_CODE) {
             if (PackageManager.PERMISSION_GRANTED == grantResults.firstOrNull()) {
-                Toast.makeText(context, "Permission request granted", Toast.LENGTH_LONG).show()
                 Navigation.findNavController(requireActivity(), R.id.fragmentContainer).navigate(PermissionsFragmentDirections.actionPermissionsFragmentToCameraFragment())
+                noPhotoView.gone()
             } else {
-                Toast.makeText(context, "Permission request denied", Toast.LENGTH_LONG).show()
+                Alerter.create(activity)
+                    .setTitle(getString(R.string.permissions_error_title))
+                    .setText(getString(R.string.permissions_error_value))
+                    .setBackgroundColorRes(R.color.colorAccent)
+                    .setIcon(R.drawable.ic_error)
+                    .setDuration(2500)
+                    .setOnClickListener(View.OnClickListener {
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        intent.data = Uri.fromParts("package", activity?.packageName, null)
+                        activity?.startActivity(intent)
+                    })
+                    .show()
+                noPhotoView.visible()
             }
         }
     }

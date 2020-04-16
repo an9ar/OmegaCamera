@@ -34,11 +34,15 @@ android {
         jvmTarget = rootProject.ext.java_version
     }
 
+    lintOptions {
+        disable 'RestrictedApi'
+    }
 }
 
 def camerax_version = '1.0.0-beta02'
 def nav_version = "2.2.1"
 def glide_version = "4.11.0"
+def alerter_version = "5.1.2"
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -55,14 +59,18 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
     //CameraX
-    implementation "androidx.camera:camera-core:${camerax_version}"
+    implementation "androidx.camera:camera-core:$camerax_version"
     implementation "androidx.camera:camera-lifecycle:$camerax_version"
-    implementation "androidx.camera:camera-camera2:${camerax_version}"
+    implementation "androidx.camera:camera-camera2:$camerax_version"
 
     // CameraX View class
     implementation "androidx.camera:camera-view:1.0.0-alpha08"
+    implementation "androidx.camera:camera-extensions:1.0.0-alpha08"
 
     // Glide
     implementation "com.github.bumptech.glide:glide:$glide_version"
     kapt "com.github.bumptech.glide:compiler:$glide_version"
+
+    //Alerter
+    implementation "com.tapadoo.android:alerter:$alerter_version"
 }
