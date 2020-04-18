@@ -17,8 +17,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import com.an9ar.omegacamera.BuildConfig
 import com.an9ar.omegacamera.R
-import com.an9ar.omegacamera.utils.padWithDisplayCutout
-import com.an9ar.omegacamera.utils.showImmersive
+import com.an9ar.omegacamera.utils.*
 import kotlinx.android.synthetic.main.fragment_gallery.*
 import java.io.File
 import java.util.*
@@ -26,12 +25,24 @@ import java.util.*
 class GalleryFragment : Fragment() {
 
     private val args: GalleryFragmentArgs by navArgs()
+    private var isControlsPanelShown: Boolean = false
 
     private lateinit var mediaList: MutableList<File>
 
     inner class MediaPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
         override fun getCount(): Int = mediaList.size
-        override fun getItem(position: Int): Fragment = PhotoFragment.create(mediaList[position])
+        override fun getItem(position: Int): Fragment = PhotoFragment.create(mediaList[position], object : ViewPagerItemClickListener{
+            override fun onClick() {
+                if (isControlsPanelShown){
+                    isControlsPanelShown = false
+                    cutoutSafeArea.gone()
+                }
+                else{
+                    isControlsPanelShown = true
+                    cutoutSafeArea.visible()
+                }
+            }
+        })
         override fun getItemPosition(obj: Any): Int = POSITION_NONE
     }
 
@@ -65,6 +76,7 @@ class GalleryFragment : Fragment() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             cutoutSafeArea.padWithDisplayCutout()
         }
+
         backButton.setOnClickListener {
             Navigation.findNavController(requireActivity(), R.id.fragmentContainer).navigateUp()
         }

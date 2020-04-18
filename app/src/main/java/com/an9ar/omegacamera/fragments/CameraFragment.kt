@@ -13,12 +13,10 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.*
 import android.webkit.MimeTypeMap
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.TextureViewMeteringPointFactory
 import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
 import androidx.core.view.setPadding
@@ -33,20 +31,20 @@ import com.an9ar.omegacamera.activities.MainActivity.Companion.KEY_EVENT_EXTRA
 import com.an9ar.omegacamera.utils.*
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.jaygoo.widget.OnRangeChangedListener
+import com.jaygoo.widget.RangeSeekBar
 import kotlinx.android.synthetic.main.camera_ui.*
 import kotlinx.android.synthetic.main.camera_ui.view.*
 import kotlinx.android.synthetic.main.fragment_camera.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.io.File
+import java.lang.Math.signum
+import java.lang.Runnable
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.math.abs
-import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.min
 
@@ -63,6 +61,8 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
     private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
     private var lastScaleFactor = 0f
+    private  var sliderAppearingJob: Job? = null
+
 
     private val displayManager by lazy {
         requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
@@ -233,6 +233,24 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
             }
         }
 
+        zoomSlider.setOnRangeChangedListener(object : OnRangeChangedListener {
+            override fun onStartTrackingTouch(view: RangeSeekBar?, isLeft: Boolean) {
+                sliderAppearingJob?.let {
+                    it.cancel()
+                }
+                zoomSlider.visible()
+            }
+            override fun onRangeChanged(view: RangeSeekBar?, leftValue: Float, rightValue: Float, isFromUser: Boolean) {
+                camera?.cameraControl?.setZoomRatio(leftValue)
+            }
+            override fun onStopTrackingTouch(view: RangeSeekBar?, isLeft: Boolean) {
+                sliderAppearingJob = CoroutineScope(Dispatchers.Main).launch {
+                    delay(1500)
+                    zoomSlider.gone()
+                }
+            }
+        });
+
         controls.cameraButtonSwitch.setOnClickListener {
             lensFacing = if (CameraSelector.LENS_FACING_FRONT == lensFacing) {
                 CameraSelector.LENS_FACING_BACK
@@ -253,7 +271,7 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
         controls.cameraButtonPhoto.setOnClickListener {
             imageCapture?.let { imageCapture ->
 
-                val photoFile = createFile(outputDirectory, FILENAME, PHOTO_EXTENSION)
+                val photoFile = createFile(outputDirectory, getString(R.string.output_photo_date_template), getString(R.string.output_photo_ext))
                 val metadata = ImageCapture.Metadata().apply {
                     isReversedHorizontal = lensFacing == CameraSelector.LENS_FACING_FRONT
                 }
@@ -332,11 +350,20 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
     }
 
     override fun onScaleBegin(detector: ScaleGestureDetector?): Boolean {
+        sliderAppearingJob?.let {
+            it.cancel()
+        }
+        zoomSlider.visible()
         return true
     }
 
     override fun onScaleEnd(detector: ScaleGestureDetector?) {
-
+        sliderAppearingJob = CoroutineScope(Dispatchers.Main).launch {
+            delay(1500)
+            if (isActive){
+                zoomSlider.gone()
+            }
+        }
     }
 
     override fun onScale(detector: ScaleGestureDetector?): Boolean {
@@ -344,8 +371,9 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
         val minZoomRatio: Float? = camera?.cameraInfo?.zoomState?.value?.minZoomRatio
         val maxZoomRatio: Float? = camera?.cameraInfo?.zoomState?.value?.maxZoomRatio
         val scaleFactor = scaleDetector.scaleFactor
-        if (lastScaleFactor == 0f || (Math.signum(scaleFactor) == Math.signum(lastScaleFactor))) {
+        if (lastScaleFactor == 0f || (signum(scaleFactor) == signum(lastScaleFactor))) {
             camera?.cameraControl?.setZoomRatio(Math.max(minZoomRatio!!, Math.min(zoomRatio!! * scaleFactor, maxZoomRatio!!)))
+            zoomSlider.setProgress(Math.max(minZoomRatio!!, Math.min(zoomRatio!! * scaleFactor, maxZoomRatio!!)))
             lastScaleFactor = scaleFactor
         } else {
             lastScaleFactor = 0f
@@ -353,13 +381,17 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
         return true
     }
 
+    private fun createFile(baseFolder: File, format: String, extension: String) =
+        File(
+            baseFolder,
+            getString(
+                R.string.output_photo_name_template,
+                SimpleDateFormat(format, Locale.US).format(System.currentTimeMillis()) + extension
+            )
+        )
+
     companion object {
-        private const val FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS"
-        private const val PHOTO_EXTENSION = ".jpg"
         private const val RATIO_4_3_VALUE = 4.0 / 3.0
         private const val RATIO_16_9_VALUE = 16.0 / 9.0
-        private fun createFile(baseFolder: File, format: String, extension: String) =
-            File(baseFolder, SimpleDateFormat(format, Locale.US)
-                .format(System.currentTimeMillis()) + extension)
     }
 }

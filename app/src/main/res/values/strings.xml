@@ -1,5 +1,9 @@
 <resources>
+    //App main strings
     <string name="app_name">Omega Camera</string>
+    <string name="output_photo_name_template">OMG_%1$s</string>
+    <string name="output_photo_date_template">yyyyMMdd_HHmmss</string>
+    <string name="output_photo_ext">.jpg</string>
 
     <string name="permissions_error_title">Разрешение не получено</string>
     <string name="permissions_error_value">Пожалуйста, предоставьте приложению доступ к камере в настройках.</string>

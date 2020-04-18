@@ -17,6 +17,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:visibility="gone"/>
 
+    <com.jaygoo.widget.VerticalRangeSeekBar
+        android:id="@+id/zoomSlider"
+        android:layout_width="wrap_content"
+        android:layout_height="300dp"
+        app:rsb_mode="single"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone"
+        app:rsb_min="1"
+        app:rsb_max="10"/>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="200dp"

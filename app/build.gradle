@@ -43,6 +43,10 @@ def camerax_version = '1.0.0-beta02'
 def nav_version = "2.2.1"
 def glide_version = "4.11.0"
 def alerter_version = "5.1.2"
+def seekbar_version = "3.0.0"
+def photoview_version = "2.3.0"
+def transform_layout_version = "1.0.3"
+def localbroadcastmanager_version = "1.0.0"
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -53,6 +57,9 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    //Broadcast manager
+    implementation "androidx.localbroadcastmanager:localbroadcastmanager:$localbroadcastmanager_version"
 
     //Navigation Graph
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
@@ -73,4 +80,13 @@ dependencies {
 
     //Alerter
     implementation "com.tapadoo.android:alerter:$alerter_version"
+
+    //Vertical SeekBar
+    implementation "com.github.Jay-Goo:RangeSeekBar:$seekbar_version"
+
+    //PhotoView
+    implementation "com.github.chrisbanes:PhotoView:$photoview_version"
+
+    //TransformationLayout
+    implementation "com.github.skydoves:transformationlayout:$transform_layout_version"
 }
