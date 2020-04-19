@@ -215,10 +215,7 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
             cameraProvider.unbindAll()
 
             try {
-                log("CAMERA BEFORE - $camera")
-                camera = cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture, imageAnalyzer)
-                log("CAMERA BEFORE - $camera")
+                camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, imageAnalyzer)
             } catch(exc: Exception) {
                 log("Use case binding failed - $exc")
             }
@@ -334,7 +331,6 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
 
     private fun aspectRatio(width: Int, height: Int): Int {
         val previewRatio = max(width, height).toDouble() / min(width, height)
-        log("RATIO - $previewRatio")
         if (abs(previewRatio - RATIO_4_3_VALUE) <= abs(previewRatio - RATIO_16_9_VALUE)) {
             return AspectRatio.RATIO_4_3
         }
@@ -379,15 +375,6 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
         val maxZoomRatio: Float? = camera?.cameraInfo?.zoomState?.value?.maxZoomRatio
         val scaleFactor = scaleDetector.scaleFactor
         if (lastScaleFactor == 0f || (signum(scaleFactor) == signum(lastScaleFactor))) {
-            log("___________________________________________")
-            log("1 arg - ${minZoomRatio!!}")
-            log("2 arg - ${Math.min(zoomRatio!! * scaleFactor, maxZoomRatio!!)}")
-            log("2.1 arg - ${zoomRatio!! * scaleFactor}")
-            log("2.2 arg - ${maxZoomRatio}")
-            log("RESULT zoomRatio - $zoomRatio")
-            log("RESULT zoomRatio OBJ value - ${camera?.cameraInfo?.zoomState?.value}")
-            log("RESULT scaleFactor - $scaleFactor")
-            log("trying sliding with zoom ${Math.max(minZoomRatio!!, Math.min(zoomRatio!! * scaleFactor, maxZoomRatio!!))}")
             camera?.cameraControl?.setZoomRatio(Math.max(minZoomRatio!!, Math.min(zoomRatio!! * scaleFactor, maxZoomRatio!!)))
             zoomSlider.setProgress(Math.max(minZoomRatio!!, Math.min(zoomRatio!! * scaleFactor, maxZoomRatio!!)))
             lastScaleFactor = scaleFactor

@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         fun getOutputDirectory(context: Context): File {
             val appContext = context.applicationContext
             val mediaDir = context.externalMediaDirs.firstOrNull()?.let {
-                File(it, appContext.resources.getString(R.string.app_name)).apply { mkdirs() } }
+                File(it, appContext.resources.getString(R.string.output_photo_directory)).apply { mkdirs() } }
             return if (mediaDir != null && mediaDir.exists()) mediaDir else appContext.filesDir
         }
         const val KEY_EVENT_ACTION = "key_event_action"

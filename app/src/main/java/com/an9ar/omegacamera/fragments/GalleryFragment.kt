@@ -84,10 +84,12 @@ class GalleryFragment : Fragment() {
         shareButton.setOnClickListener {
             mediaList.getOrNull(photoViewPager.currentItem)?.let { mediaFile ->
                 val intent = Intent().apply {
+                    log("mediaType - ${MimeTypeMap.getSingleton().getMimeTypeFromExtension(mediaFile.extension)}")
                     val mediaType = MimeTypeMap.getSingleton()
                         .getMimeTypeFromExtension(mediaFile.extension)
                     val uri = FileProvider.getUriForFile(
                         view.context, BuildConfig.APPLICATION_ID + ".provider", mediaFile)
+                    log("URI - $uri")
                     putExtra(Intent.EXTRA_STREAM, uri)
                     type = mediaType
                     action = Intent.ACTION_SEND

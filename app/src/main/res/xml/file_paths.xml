@@ -17,7 +17,8 @@
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
     <external-media-path
         name="media"
-        android:path="@{string/app_name}/"
-        path="@{string/app_name}/" />
+        android:path="/@{string/output_photo_directory}/"
+        path="/@{string/output_photo_directory}/" />
     <files-path name="files" path="."/>
+    <root-path name="root" path="." />
 </paths>

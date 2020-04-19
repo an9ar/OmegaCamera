@@ -1,6 +1,7 @@
 <resources>
     //App main strings
     <string name="app_name">Omega Camera</string>
+    <string name="output_photo_directory">OmegaCamera</string>
     <string name="output_photo_name_template">OMG_%1$s</string>
     <string name="output_photo_date_template">yyyyMMdd_HHmmss</string>
     <string name="output_photo_ext">.jpg</string>
