@@ -25,7 +25,7 @@ import java.util.*
 class GalleryFragment : Fragment() {
 
     private val args: GalleryFragmentArgs by navArgs()
-    private var isControlsPanelShown: Boolean = false
+    private var isControlsPanelShown: Boolean = true
 
     private lateinit var mediaList: MutableList<File>
 

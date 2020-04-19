@@ -172,6 +172,9 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
         cameraExecutor.shutdown()
         broadcastManager.unregisterReceiver(volumeDownReceiver)
         displayManager.unregisterDisplayListener(displayListener)
+        sliderAppearingJob?.let {
+            it.cancel()
+        }
     }
 
     private fun bindCameraUseCases() {
@@ -212,8 +215,10 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
             cameraProvider.unbindAll()
 
             try {
+                log("CAMERA BEFORE - $camera")
                 camera = cameraProvider.bindToLifecycle(
                     this, cameraSelector, preview, imageCapture, imageAnalyzer)
+                log("CAMERA BEFORE - $camera")
             } catch(exc: Exception) {
                 log("Use case binding failed - $exc")
             }
@@ -242,6 +247,7 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
             }
             override fun onRangeChanged(view: RangeSeekBar?, leftValue: Float, rightValue: Float, isFromUser: Boolean) {
                 camera?.cameraControl?.setZoomRatio(leftValue)
+                //log("set zoom ratio - $leftValue | current zoom - ${camera?.cameraInfo?.zoomState?.value?.zoomRatio}")
             }
             override fun onStopTrackingTouch(view: RangeSeekBar?, isLeft: Boolean) {
                 sliderAppearingJob = CoroutineScope(Dispatchers.Main).launch {
@@ -249,7 +255,7 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
                     zoomSlider.gone()
                 }
             }
-        });
+        })
 
         controls.cameraButtonSwitch.setOnClickListener {
             lensFacing = if (CameraSelector.LENS_FACING_FRONT == lensFacing) {
@@ -328,6 +334,7 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
 
     private fun aspectRatio(width: Int, height: Int): Int {
         val previewRatio = max(width, height).toDouble() / min(width, height)
+        log("RATIO - $previewRatio")
         if (abs(previewRatio - RATIO_4_3_VALUE) <= abs(previewRatio - RATIO_16_9_VALUE)) {
             return AspectRatio.RATIO_4_3
         }
@@ -372,6 +379,15 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
         val maxZoomRatio: Float? = camera?.cameraInfo?.zoomState?.value?.maxZoomRatio
         val scaleFactor = scaleDetector.scaleFactor
         if (lastScaleFactor == 0f || (signum(scaleFactor) == signum(lastScaleFactor))) {
+            log("___________________________________________")
+            log("1 arg - ${minZoomRatio!!}")
+            log("2 arg - ${Math.min(zoomRatio!! * scaleFactor, maxZoomRatio!!)}")
+            log("2.1 arg - ${zoomRatio!! * scaleFactor}")
+            log("2.2 arg - ${maxZoomRatio}")
+            log("RESULT zoomRatio - $zoomRatio")
+            log("RESULT zoomRatio OBJ value - ${camera?.cameraInfo?.zoomState?.value}")
+            log("RESULT scaleFactor - $scaleFactor")
+            log("trying sliding with zoom ${Math.max(minZoomRatio!!, Math.min(zoomRatio!! * scaleFactor, maxZoomRatio!!))}")
             camera?.cameraControl?.setZoomRatio(Math.max(minZoomRatio!!, Math.min(zoomRatio!! * scaleFactor, maxZoomRatio!!)))
             zoomSlider.setProgress(Math.max(minZoomRatio!!, Math.min(zoomRatio!! * scaleFactor, maxZoomRatio!!)))
             lastScaleFactor = scaleFactor
@@ -393,5 +409,8 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
     companion object {
         private const val RATIO_4_3_VALUE = 4.0 / 3.0
         private const val RATIO_16_9_VALUE = 16.0 / 9.0
+        private const val RATIO_19_5_9_VALUE = 16.0 / 9.0
+        private const val RATIO_20_9_VALUE = 16.0 / 9.0
+        private const val RATIO_21_9_VALUE = 16.0 / 9.0
     }
 }
