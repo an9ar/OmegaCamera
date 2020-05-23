@@ -396,8 +396,5 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
     companion object {
         private const val RATIO_4_3_VALUE = 4.0 / 3.0
         private const val RATIO_16_9_VALUE = 16.0 / 9.0
-        private const val RATIO_19_5_9_VALUE = 16.0 / 9.0
-        private const val RATIO_20_9_VALUE = 16.0 / 9.0
-        private const val RATIO_21_9_VALUE = 16.0 / 9.0
     }
 }
