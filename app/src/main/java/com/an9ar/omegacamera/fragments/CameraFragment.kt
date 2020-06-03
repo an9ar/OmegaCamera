@@ -1,5 +1,6 @@
 package com.an9ar.omegacamera.fragments
 
+import android.animation.ObjectAnimator
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -47,6 +48,7 @@ import java.util.concurrent.Executors
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sign
 
 class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
 
@@ -120,11 +122,11 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
             previewView.setOnTouchListener { _, event ->
                 return@setOnTouchListener when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        cameraFocus.x = event.x - 64
-                        cameraFocus.y = event.y - 64
                         true
                     }
                     MotionEvent.ACTION_UP -> {
+                        cameraFocus.x = event.x - 64
+                        cameraFocus.y = event.y - 64
                         val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
                             previewView.width.toFloat(), previewView.height.toFloat()
                         )
@@ -292,6 +294,7 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
                         override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                             val savedUri = output.savedUri ?: Uri.fromFile(photoFile)
                             log("Photo capture succeeded: $savedUri")
+                            log("ROTATION - ${activity?.resources?.configuration?.orientation}")
 
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                 setGalleryThumbnail(savedUri)
@@ -374,9 +377,9 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
         val minZoomRatio: Float? = camera?.cameraInfo?.zoomState?.value?.minZoomRatio
         val maxZoomRatio: Float? = camera?.cameraInfo?.zoomState?.value?.maxZoomRatio
         val scaleFactor = scaleDetector.scaleFactor
-        if (lastScaleFactor == 0f || (signum(scaleFactor) == signum(lastScaleFactor))) {
-            camera?.cameraControl?.setZoomRatio(Math.max(minZoomRatio!!, Math.min(zoomRatio!! * scaleFactor, maxZoomRatio!!)))
-            zoomSlider.setProgress(Math.max(minZoomRatio!!, Math.min(zoomRatio!! * scaleFactor, maxZoomRatio!!)))
+        if (lastScaleFactor == 0f || (sign(scaleFactor) == sign(lastScaleFactor))) {
+            camera?.cameraControl?.setZoomRatio(max(minZoomRatio!!, min(zoomRatio!! * scaleFactor, maxZoomRatio!!)))
+            zoomSlider.setProgress(max(minZoomRatio!!, min(zoomRatio!! * scaleFactor, maxZoomRatio!!)))
             lastScaleFactor = scaleFactor
         } else {
             lastScaleFactor = 0f

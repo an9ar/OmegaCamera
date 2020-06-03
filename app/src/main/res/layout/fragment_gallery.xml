@@ -6,7 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@android:color/black">
 
-    <androidx.viewpager.widget.ViewPager
+    <com.an9ar.omegacamera.utils.ResizeableViewPager
         android:id="@+id/photoViewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
