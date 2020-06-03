@@ -257,6 +257,9 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
         })
 
         controls.cameraButtonSwitch.setOnClickListener {
+            val animation = ObjectAnimator.ofFloat(it, "rotationY", 0F, 360F)
+            animation.duration = 800
+            animation.start()
             lensFacing = if (CameraSelector.LENS_FACING_FRONT == lensFacing) {
                 CameraSelector.LENS_FACING_BACK
             } else {
