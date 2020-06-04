@@ -114,45 +114,69 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
             updateCameraUi()
             bindCameraUseCases()
         }
+        setUpScreenRotationListener()
         setUpScreenControls()
+    }
+
+    private fun setUpScreenRotationListener() {
+        val rotationListener = object : RotationListener(context) {
+            override fun onSimpleOrientationChanged(orientation: Int) {
+                if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    log("ORIENTATION - ORIENTATION_LANDSCAPE")
+                } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    log("ORIENTATION - ORIENTATION_PORTRAIT")
+                }
+            }
+        }
+        rotationListener.enable()
     }
 
     private fun setUpScreenControls() {
         previewView.afterMeasured {
+            var ignoreActionUp = false
             previewView.setOnTouchListener { _, event ->
+                log("motionEvent - ${event.action}")
                 return@setOnTouchListener when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
+                        ignoreActionUp = false
                         true
                     }
                     MotionEvent.ACTION_UP -> {
-                        cameraFocus.x = event.x - 64
-                        cameraFocus.y = event.y - 64
-                        val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
-                            previewView.width.toFloat(), previewView.height.toFloat()
-                        )
-                        val autoFocusPoint = factory.createPoint(event.x, event.y)
-                        CoroutineScope(Dispatchers.Main).launch{
-                            cameraFocus.visible()
-                            delay(200)
-                            cameraFocus.gone()
-                        }
-                        try {
-                            camera?.cameraControl?.startFocusAndMetering(
-                                FocusMeteringAction.Builder(
-                                    autoFocusPoint,
-                                    FocusMeteringAction.FLAG_AF
-                                ).apply {
-                                    //focus only when the user tap the preview
-                                    disableAutoCancel()
-                                }.build()
+                        if (!ignoreActionUp){
+                            cameraFocus.x = event.x - 64
+                            cameraFocus.y = event.y - 64
+                            val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
+                                previewView.width.toFloat(), previewView.height.toFloat()
                             )
-                        } catch (e: CameraInfoUnavailableException) {
-                            log( "cannot access camera - $e")
+                            val autoFocusPoint = factory.createPoint(event.x, event.y)
+                            CoroutineScope(Dispatchers.Main).launch{
+                                cameraFocus.visible()
+                                delay(200)
+                                cameraFocus.gone()
+                            }
+                            try {
+                                camera?.cameraControl?.startFocusAndMetering(
+                                    FocusMeteringAction.Builder(
+                                        autoFocusPoint,
+                                        FocusMeteringAction.FLAG_AF
+                                    ).apply {
+                                        //focus only when the user tap the preview
+                                        disableAutoCancel()
+                                    }.build()
+                                )
+                            } catch (e: CameraInfoUnavailableException) {
+                                log( "cannot access camera - $e")
+                            }
+                            true
                         }
-                        true
+                        else{
+                            false
+                        }
+
                     }
                     else -> {
                         scaleDetector.onTouchEvent(event)
+                        ignoreActionUp = true
                         true
                     }
                 }
@@ -209,8 +233,8 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
                 .setTargetRotation(rotation)
                 .build()
                 .also {
-                    it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luminosity ->
-                        //todo log("Average luminosity: $luminosity")
+                    it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luminosityLevel ->
+                        //todo log("Average luminosity: luminosityLevel")
                     })
                 }
 

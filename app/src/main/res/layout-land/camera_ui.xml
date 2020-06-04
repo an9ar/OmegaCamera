@@ -22,9 +22,10 @@
         android:layout_width="wrap_content"
         android:layout_height="300dp"
         app:rsb_mode="single"
+        android:layout_marginStart="20dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         android:visibility="gone"
         app:rsb_min="1"
         app:rsb_max="10"/>
