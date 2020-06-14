@@ -14,8 +14,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import com.an9ar.omegacamera.R
-import com.an9ar.omegacamera.utils.gone
-import com.an9ar.omegacamera.utils.visible
+import com.an9ar.omegacamera.extensions.gone
+import com.an9ar.omegacamera.extensions.visible
 import com.tapadoo.alerter.Alerter
 import kotlinx.android.synthetic.main.fragmet_permissions.*
 

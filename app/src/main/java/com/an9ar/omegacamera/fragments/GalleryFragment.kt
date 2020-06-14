@@ -17,6 +17,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import com.an9ar.omegacamera.BuildConfig
 import com.an9ar.omegacamera.R
+import com.an9ar.omegacamera.extensions.*
 import com.an9ar.omegacamera.utils.*
 import kotlinx.android.synthetic.main.fragment_gallery.*
 import java.io.File
@@ -84,7 +85,10 @@ class GalleryFragment : Fragment() {
         shareButton.setOnClickListener {
             mediaList.getOrNull(photoViewPager.currentItem)?.let { mediaFile ->
                 val intent = Intent().apply {
-                    log("mediaType - ${MimeTypeMap.getSingleton().getMimeTypeFromExtension(mediaFile.extension)}")
+                    log(
+                        "mediaType - ${MimeTypeMap.getSingleton()
+                            .getMimeTypeFromExtension(mediaFile.extension)}"
+                    )
                     val mediaType = MimeTypeMap.getSingleton()
                         .getMimeTypeFromExtension(mediaFile.extension)
                     val uri = FileProvider.getUriForFile(

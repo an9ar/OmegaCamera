@@ -1,4 +1,4 @@
-package com.an9ar.omegacamera.utils
+package com.an9ar.omegacamera.extensions
 
 import android.os.Build
 import android.util.Log
@@ -53,7 +53,8 @@ fun View.padWithDisplayCutout() {
 
 fun AlertDialog.showImmersive() {
     window?.setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
-    window?.decorView?.systemUiVisibility = FLAGS_FULLSCREEN
+    window?.decorView?.systemUiVisibility =
+        FLAGS_FULLSCREEN
     show()
     window?.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
 }

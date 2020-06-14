@@ -7,7 +7,7 @@ import android.os.Bundle
 import android.view.KeyEvent
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.an9ar.omegacamera.R
-import com.an9ar.omegacamera.utils.FLAGS_FULLSCREEN
+import com.an9ar.omegacamera.extensions.FLAGS_FULLSCREEN
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 

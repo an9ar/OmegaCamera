@@ -29,6 +29,7 @@ import com.an9ar.omegacamera.R
 import com.an9ar.omegacamera.activities.MainActivity
 import com.an9ar.omegacamera.activities.MainActivity.Companion.KEY_EVENT_ACTION
 import com.an9ar.omegacamera.activities.MainActivity.Companion.KEY_EVENT_EXTRA
+import com.an9ar.omegacamera.extensions.*
 import com.an9ar.omegacamera.utils.*
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -39,7 +40,6 @@ import kotlinx.android.synthetic.main.camera_ui.view.*
 import kotlinx.android.synthetic.main.fragment_camera.*
 import kotlinx.coroutines.*
 import java.io.File
-import java.lang.Math.signum
 import java.lang.Runnable
 import java.text.SimpleDateFormat
 import java.util.*
@@ -165,7 +165,7 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
                                     }.build()
                                 )
                             } catch (e: CameraInfoUnavailableException) {
-                                log( "cannot access camera - $e")
+                                log("cannot access camera - $e")
                             }
                             true
                         }
