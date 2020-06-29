@@ -1,6 +1,7 @@
 package com.an9ar.omegacamera.fragments
 
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -131,6 +132,7 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
         rotationListener.enable()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setUpScreenControls() {
         previewView.afterMeasured {
             var ignoreActionUp = false
@@ -172,7 +174,6 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
                         else{
                             false
                         }
-
                     }
                     else -> {
                         scaleDetector.onTouchEvent(event)
@@ -198,9 +199,7 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
         cameraExecutor.shutdown()
         broadcastManager.unregisterReceiver(volumeDownReceiver)
         displayManager.unregisterDisplayListener(displayListener)
-        sliderAppearingJob?.let {
-            it.cancel()
-        }
+        sliderAppearingJob?.cancel()
     }
 
     private fun bindCameraUseCases() {
@@ -383,9 +382,7 @@ class CameraFragment : Fragment(), ScaleGestureDetector.OnScaleGestureListener {
     }
 
     override fun onScaleBegin(detector: ScaleGestureDetector?): Boolean {
-        sliderAppearingJob?.let {
-            it.cancel()
-        }
+        sliderAppearingJob?.cancel()
         zoomSlider.visible()
         return true
     }
